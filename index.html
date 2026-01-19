@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escena Secreta | Autoplay Infinito Real</title>
+
+  <style>
+    body { background:#0b0d12; color:white; margin:0; font-family:system-ui; }
+    header { padding:15px; background:#11141b; text-align:center; font-size:22px; }
+    #playerContainer { max-width:900px; margin:20px auto; padding:10px; }
+    iframe, video { width:100%; aspect-ratio:16/9; border-radius:14px; background:black; }
+    #controls { display:flex; gap:10px; justify-content:center; margin-top:15px; }
+    button { padding:10px 20px; border:0; border-radius:10px; background:#7e5bff; color:white; font-weight:bold; cursor:pointer; }
+  </style>
+</head>
+
+<body>
+
+<header>🎬 Escena Secreta – Autoplay Infinito</header>
+
+<div id="playerContainer">
+  <div id="videoWrapper"></div>
+
+  <div id="controls">
+    <button onclick="prevVideo()">⏮ Anterior</button>
+    <button onclick="pauseVideo()">⏸ Pausar</button>
+    <button onclick="playVideo()">▶️ Reproducir</button>
+    <button onclick="nextVideo()">⏭ Siguiente</button>
+  </div>
+</div>
+
+<script>
+/* -----------------------------------------
+   LISTA DE VIDEOS
+------------------------------------------*/
+const playlist = [
+  { type: "youtube", src: "https://www.youtube.com/embed/DYed5whEf4g" },
+  { type: "youtube", src: "https://www.youtube.com/embed/jfKfPfyJRdk" },
+  { type: "youtube", src: "https://www.youtube.com/embed/5qap5aO4i9A" },
+  { type: "youtube", src: "https://www.youtube.com/embed/hHW1oY26kxQ" },
+  { type: "youtube", src: "https://www.youtube.com/embed/LXb3EKWsInQ" },
+  { type: "youtube", src: "https://www.youtube.com/embed/2OEL4P1Rz04" },
+  { type: "youtube", src: "https://www.youtube.com/embed/f02mOEt11OQ" },
+  { type: "youtube", src: "https://www.youtube.com/embed/Z6L4u2i97mE" },
+
+  // MP4
+  { type: "mp4", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" },
+  { type: "mp4", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" },
+  { type: "mp4", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" },
+  { type: "mp4", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4" },
+  { type: "mp4", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" },
+  { type: "mp4", src: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4" }
+];
+
+let lastIndex = -1;
+let videoElement;
+const wrapper = document.getElementById("videoWrapper");
+
+/* -----------------------------------------
+   VIDEO ALEATORIO INFINITO
+------------------------------------------*/
+function getRandomIndex() {
+  let idx;
+  do {
+    idx = Math.floor(Math.random() * playlist.length);
+  } while (idx === lastIndex);
+
+  lastIndex = idx;
+  return idx;
+}
+
+/* -----------------------------------------
+   CARGAR VIDEO + AUTOPLAY + ANTI-ERRORES
+------------------------------------------*/
+function loadVideo(i) {
+  wrapper.innerHTML = "";
+  const vid = playlist[i];
+
+  let safetyTimeout = setTimeout(() => {
+    console.log("⚠ Timeout → next video");
+    nextVideo();
+  }, 6000);
+
+  /* ---- YOUTUBE ---- */
+  if (vid.type === "youtube") {
+    wrapper.innerHTML = `
+      <iframe id="playerVideo"
+        src="${vid.src}?autoplay=1&mute=1&controls=1&rel=0&enablejsapi=1"
+        allow="autoplay; encrypted-media"
+        allowfullscreen></iframe>
+    `;
+
+    const iframe = document.getElementById("playerVideo");
+
+    iframe.onerror = () => nextVideo();
+
+    iframe.onload = () => {
+      clearTimeout(safetyTimeout);
+      setupYouTubeEndDetection(iframe);
+    };
+
+  } else {
+    /* ---- MP4 ---- */
+    wrapper.innerHTML = `
+      <video id="playerVideo" autoplay controls>
+        <source src="${vid.src}">
+      </video>
+    `;
+
+    videoElement = document.getElementById("playerVideo");
+
+    videoElement.onerror = () => nextVideo();
+    videoElement.onloadeddata = () => clearTimeout(safetyTimeout);
+    videoElement.onended = nextVideo;
+  }
+}
+
+/* -----------------------------------------
+   DETECCIÓN ESTADOS YOUTUBE
+------------------------------------------*/
+function setupYouTubeEndDetection(iframe) {
+  window.addEventListener("message", (event) => {
+    try {
+      const data = JSON.parse(event.data);
+
+      if (data.event === "onStateChange") {
+        if (data.info === 0) nextVideo();       // fin
+        if (data.info === -1) nextVideo();      // error
+        if (data.info === 5) nextVideo();       // no disponible
+      }
+
+    } catch {}
+  });
+
+  iframe.contentWindow.postMessage(JSON.stringify({
+    event: "listening",
+    id: "playerVideo"
+  }), "*");
+}
+
+/* -----------------------------------------
+   CONTROLES
+------------------------------------------*/
+function nextVideo() {
+  loadVideo(getRandomIndex());
+}
+function prevVideo() {
+  loadVideo(getRandomIndex());
+}
+function pauseVideo() {
+  if (videoElement) videoElement.pause();
+}
+function playVideo() {
+  if (videoElement) videoElement.play();
+}
+
+/* -----------------------------------------
+   COMENZAR AUTOMÁTICAMENTE
+------------------------------------------*/
+window.onload = () => {
+  nextVideo();
+};
+</script>
+
+</body>
+</html>
