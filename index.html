@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta name="google-adsense-account" content="ca-pub-3335147196660816">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ✅ Google AdSense – Verificación -->
+  <meta name="google-adsense-account" content="ca-pub-3335147196660816">
+  <script async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3335147196660816"
+    crossorigin="anonymous"></script>
+
   <title>Escena Secreta | Autoplay Infinito Real</title>
 
   <style>
@@ -15,8 +21,7 @@
     button { padding:10px 20px; border:0; border-radius:10px; background:#7e5bff; color:white; font-weight:bold; cursor:pointer; }
   </style>
 </head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3335147196660816"
-     crossorigin="anonymous"></script>
+
 <body>
 
 <header>🎬 Escena Secreta – Autoplay Infinito</header>
@@ -32,24 +37,7 @@
   </div>
 </div>
 
-<!-- ---------------------------
-     Códigos externos añadidos
---------------------------- -->
-<script async="async" data-cfasync="false" src="https://pl28513136.effectivegatecpm.com/1d75c766c73ebc58b565c0a962061911/invoke.js"></script>
-<div id="container-1d75c766c73ebc58b565c0a962061911"></div>
-<script src="https://pl28513113.effectivegatecpm.com/89/f1/7d/89f17dd30a3143c38e05ed2740c48eda.js"></script>
-
 <script>
-  <script>
-  atOptions = {
-    'key' : '59ef0dd9468eb2d469a4e82dc94b1fbb',
-    'format' : 'iframe',
-    'height' : 60,
-    'width' : 468,
-    'params' : {}
-  };
-</script>
-<script src="https://www.highperformanceformat.com/59ef0dd9468eb2d469a4e82dc94b1fbb/invoke.js"></script>
 /* -----------------------------------------
    LISTA DE VIDEOS
 ------------------------------------------*/
@@ -77,31 +65,26 @@ let videoElement;
 const wrapper = document.getElementById("videoWrapper");
 
 /* -----------------------------------------
-   VIDEO ALEATORIO INFINITO
+   ALEATORIO INFINITO
 ------------------------------------------*/
 function getRandomIndex() {
   let idx;
   do {
     idx = Math.floor(Math.random() * playlist.length);
   } while (idx === lastIndex);
-
   lastIndex = idx;
   return idx;
 }
 
 /* -----------------------------------------
-   CARGAR VIDEO + AUTOPLAY + ANTI-ERRORES
+   CARGAR VIDEO (NUNCA SE DETIENE)
 ------------------------------------------*/
 function loadVideo(i) {
   wrapper.innerHTML = "";
   const vid = playlist[i];
 
-  let safetyTimeout = setTimeout(() => {
-    console.log("⚠ Timeout → next video");
-    nextVideo();
-  }, 6000);
+  let safetyTimeout = setTimeout(() => nextVideo(), 6000);
 
-  /* ---- YOUTUBE ---- */
   if (vid.type === "youtube") {
     wrapper.innerHTML = `
       <iframe id="playerVideo"
@@ -111,7 +94,6 @@ function loadVideo(i) {
     `;
 
     const iframe = document.getElementById("playerVideo");
-
     iframe.onerror = () => nextVideo();
 
     iframe.onload = () => {
@@ -120,7 +102,6 @@ function loadVideo(i) {
     };
 
   } else {
-    /* ---- MP4 ---- */
     wrapper.innerHTML = `
       <video id="playerVideo" autoplay controls>
         <source src="${vid.src}">
@@ -128,27 +109,21 @@ function loadVideo(i) {
     `;
 
     videoElement = document.getElementById("playerVideo");
-
     videoElement.onerror = () => nextVideo();
-    videoElement.onloadeddata = () => clearTimeout(safetyTimeout);
     videoElement.onended = nextVideo;
   }
 }
 
 /* -----------------------------------------
-   DETECCIÓN ESTADOS YOUTUBE
+   DETECTOR YOUTUBE
 ------------------------------------------*/
 function setupYouTubeEndDetection(iframe) {
-  window.addEventListener("message", (event) => {
+  window.addEventListener("message", (e) => {
     try {
-      const data = JSON.parse(event.data);
-
-      if (data.event === "onStateChange") {
-        if (data.info === 0) nextVideo();       // fin
-        if (data.info === -1) nextVideo();      // error
-        if (data.info === 5) nextVideo();       // no disponible
+      const d = JSON.parse(e.data);
+      if (d.event === "onStateChange" && [0, -1, 5].includes(d.info)) {
+        nextVideo();
       }
-
     } catch {}
   });
 
@@ -161,38 +136,18 @@ function setupYouTubeEndDetection(iframe) {
 /* -----------------------------------------
    CONTROLES
 ------------------------------------------*/
-function nextVideo() {
-  loadVideo(getRandomIndex());
-}
-function prevVideo() {
-  loadVideo(getRandomIndex());
-}
-function pauseVideo() {
-  if (videoElement) videoElement.pause();
-}
-function playVideo() {
-  if (videoElement) videoElement.play();
-}
+function nextVideo() { loadVideo(getRandomIndex()); }
+function prevVideo() { loadVideo(getRandomIndex()); }
+function pauseVideo() { if (videoElement) videoElement.pause(); }
+function playVideo() { if (videoElement) videoElement.play(); }
 
 /* -----------------------------------------
-   COMENZAR AUTOMÁTICAMENTE
+   INICIO AUTOMÁTICO
 ------------------------------------------*/
-window.onload = () => {
-  nextVideo();
-};
-</script><script>
-  atOptions = {
-    'key' : '59ef0dd9468eb2d469a4e82dc94b1fbb',
-    'format' : 'iframe',
-    'height' : 60,
-    'width' : 468,
-    'params' : {}
-  };
+window.onload = () => nextVideo();
 </script>
-<script src="https://www.highperformanceformat.com/59ef0dd9468eb2d469a4e82dc94b1fbb/invoke.js"></script>
 
 </body>
 </html>
-
 
 
